@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Todo List</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      color: #1f2937;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 520px;
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      box-shadow: 0 12px 32px rgba(31, 41, 55, 0.12);
+      padding: 24px;
+    }
+
+    h1 {
+      margin: 0 0 20px;
+      font-size: 28px;
+      line-height: 1.2;
+      color: #111827;
+    }
+
+    .todo-form {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+
+    .todo-input {
+      flex: 1;
+      min-width: 0;
+      height: 44px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 0 12px;
+      font-size: 16px;
+      outline: none;
+      background: #ffffff;
+    }
+
+    .todo-input:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.14);
+    }
+
+    .priority-buttons,
+    .item-priority-buttons {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .priority-button {
+      height: 34px;
+      border: 1px solid #cbd5e1;
+      border-radius: 999px;
+      padding: 0 10px;
+      background: #ffffff;
+      color: #374151;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .priority-buttons .priority-button {
+      height: 44px;
+    }
+
+    .priority-button:hover {
+      background: #f3f4f6;
+    }
+
+    .priority-button.active[data-priority="high"] {
+      border-color: #ef4444;
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+
+    .priority-button.active[data-priority="normal"] {
+      border-color: #2563eb;
+      background: #dbeafe;
+      color: #1d4ed8;
+    }
+
+    .priority-button.active[data-priority="low"] {
+      border-color: #10b981;
+      background: #d1fae5;
+      color: #047857;
+    }
+
+    .priority-button:focus-visible {
+      outline: 0;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.14);
+    }
+
+    .add-button,
+    .delete-button {
+      border: 0;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 700;
+      transition: background-color 0.15s ease, transform 0.15s ease;
+    }
+
+    .add-button {
+      height: 44px;
+      padding: 0 18px;
+      background: #2563eb;
+      color: #ffffff;
+      white-space: nowrap;
+    }
+
+    .add-button:hover {
+      background: #1d4ed8;
+    }
+
+    .add-button:active,
+    .delete-button:active {
+      transform: translateY(1px);
+    }
+
+    .todo-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: 10px;
+      min-height: 14px;
+    }
+
+    .todo-list.drag-over {
+      border-radius: 8px;
+      background: #eff6ff;
+    }
+
+    .todo-item {
+      display: grid;
+      grid-template-columns: auto auto minmax(0, 1fr) auto auto;
+      align-items: center;
+      gap: 10px;
+      min-height: 46px;
+      border: 1px solid #e5e7eb;
+      border-radius: 6px;
+      padding: 10px;
+      background: #ffffff;
+    }
+
+    .todo-item.dragging {
+      opacity: 0.55;
+    }
+
+    .drag-handle {
+      color: #9ca3af;
+      cursor: grab;
+      font-size: 18px;
+      line-height: 1;
+      user-select: none;
+    }
+
+    .todo-item:active .drag-handle {
+      cursor: grabbing;
+    }
+
+    .todo-item.priority-high {
+      border-left: 4px solid #ef4444;
+    }
+
+    .todo-item.priority-normal {
+      border-left: 4px solid #2563eb;
+    }
+
+    .todo-item.priority-low {
+      border-left: 4px solid #10b981;
+    }
+
+    .todo-checkbox {
+      width: 18px;
+      height: 18px;
+      flex: 0 0 auto;
+      cursor: pointer;
+    }
+
+    .todo-text {
+      flex: 1;
+      min-width: 0;
+      overflow-wrap: anywhere;
+      font-size: 16px;
+      line-height: 1.35;
+    }
+
+    .todo-item.completed .todo-text {
+      color: #9ca3af;
+      text-decoration: line-through;
+    }
+
+    .delete-button {
+      flex: 0 0 auto;
+      min-width: 52px;
+      height: 34px;
+      padding: 0 10px;
+      background: #ef4444;
+      color: #ffffff;
+    }
+
+    .delete-button:hover {
+      background: #dc2626;
+    }
+
+    .empty-message {
+      margin: 18px 0 0;
+      color: #6b7280;
+      text-align: center;
+      font-size: 15px;
+    }
+
+    .empty-message.hidden {
+      display: none;
+    }
+
+    .status-message {
+      min-height: 20px;
+      margin: 14px 0 0;
+      color: #b45309;
+      font-size: 14px;
+      line-height: 1.35;
+      text-align: center;
+    }
+
+    .status-message:empty {
+      display: none;
+    }
+
+    @media (max-width: 420px) {
+      body {
+        padding: 16px;
+        align-items: flex-start;
+      }
+
+      .app {
+        padding: 18px;
+      }
+
+      .todo-form {
+        grid-template-columns: 1fr;
+      }
+
+      .priority-buttons {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      .add-button {
+        width: 100%;
+      }
+
+      .todo-item {
+        grid-template-columns: auto auto minmax(0, 1fr) auto;
+      }
+
+      .item-priority-buttons {
+        grid-column: 3 / 5;
+        width: 100%;
+      }
+
+      .item-priority-buttons .priority-button {
+        flex: 1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app" aria-labelledby="app-title">
+    <h1 id="app-title">Todo List</h1>
+
+    <form class="todo-form" id="todo-form">
+      <input
+        class="todo-input"
+        id="todo-input"
+        type="text"
+        placeholder="할 일을 입력하세요"
+        autocomplete="off"
+        aria-label="할 일 입력"
+      >
+      <div class="priority-buttons" id="priority-buttons" role="group" aria-label="우선순위 선택">
+        <button class="priority-button" type="button" data-priority="high">높음</button>
+        <button class="priority-button active" type="button" data-priority="normal">보통</button>
+        <button class="priority-button" type="button" data-priority="low">낮음</button>
+      </div>
+      <button class="add-button" type="submit">추가</button>
+    </form>
+
+    <ul class="todo-list" id="todo-list"></ul>
+    <p class="empty-message" id="empty-message">아직 등록된 할 일이 없습니다.</p>
+    <p class="status-message" id="status-message" aria-live="polite"></p>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const SUPABASE_URL = 'https://xrkisdgbaazkxiupvupr.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhya2lzZGdiYWF6a3hpdXB2dXByIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1NjYyNDAsImV4cCI6MjA5NDE0MjI0MH0.samdXnhBRHVqgRBhDfiac7rK3ZwL-eABMk7z-2LWU8I';
+    const TODO_TABLE = 'todos';
+
+    const todoForm = document.getElementById('todo-form');
+    const todoInput = document.getElementById('todo-input');
+    const priorityButtons = document.getElementById('priority-buttons');
+    const todoList = document.getElementById('todo-list');
+    const emptyMessage = document.getElementById('empty-message');
+    const statusMessage = document.getElementById('status-message');
+
+    const priorityOrder = {
+      high: 0,
+      normal: 1,
+      low: 2
+    };
+
+    const priorityLabels = {
+      high: '높음',
+      normal: '보통',
+      low: '낮음'
+    };
+
+    let draggedTodoId = null;
+    let selectedPriority = 'normal';
+    let todos = [];
+
+    const isSupabaseConfigured = SUPABASE_URL !== 'YOUR_SUPABASE_URL'
+      && SUPABASE_ANON_KEY !== 'YOUR_SUPABASE_ANON_KEY';
+    const supabaseClient = isSupabaseConfigured
+      ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+          auth: {
+            persistSession: false
+          }
+        })
+      : null;
+
+    async function loadTodos() {
+      if (!supabaseClient) {
+        setStatus('Supabase URL과 anon key를 index.html에 설정하면 데이터가 저장됩니다.');
+        return [];
+      }
+
+      const { data, error } = await supabaseClient
+        .from(TODO_TABLE)
+        .select('id, text, priority, order_index, completed');
+
+      if (error) {
+        setStatus(`할 일을 불러오지 못했습니다: ${error.message}`);
+        return [];
+      }
+
+      setStatus('');
+      return normalizeTodos(data || []);
+    }
+
+    function setStatus(message) {
+      statusMessage.textContent = message;
+    }
+
+    function toDbTodo(todo) {
+      return {
+        id: todo.id,
+        text: todo.text,
+        priority: getPriority(todo.priority),
+        order_index: todo.order,
+        completed: Boolean(todo.completed)
+      };
+    }
+
+    function toDbPatch(fields) {
+      const patch = {};
+
+      if (fields.text !== undefined) {
+        patch.text = fields.text;
+      }
+
+      if (fields.priority !== undefined) {
+        patch.priority = getPriority(fields.priority);
+      }
+
+      if (fields.order !== undefined) {
+        patch.order_index = fields.order;
+      }
+
+      if (fields.completed !== undefined) {
+        patch.completed = Boolean(fields.completed);
+      }
+
+      return patch;
+    }
+
+    function getPriority(priority) {
+      return priorityOrder[priority] === undefined ? 'normal' : priority;
+    }
+
+    function normalizeTodos(todoItems) {
+      return todoItems.map((todo, index) => ({
+        id: Number(todo.id),
+        text: todo.text,
+        completed: Boolean(todo.completed),
+        priority: getPriority(todo.priority),
+        order: Number.isFinite(todo.order) ? todo.order : Number.isFinite(todo.order_index) ? todo.order_index : index
+      }));
+    }
+
+    function getSortedTodos(priority) {
+      return todos
+        .filter((todo) => getPriority(todo.priority) === priority)
+        .sort((a, b) => {
+          const orderDiff = a.order - b.order;
+
+          if (orderDiff !== 0) {
+            return orderDiff;
+          }
+
+          return a.id - b.id;
+        });
+    }
+
+    function getNextOrder(priority) {
+      const orders = getSortedTodos(priority).map((todo) => todo.order);
+      return orders.length === 0 ? 0 : Math.max(...orders) + 1;
+    }
+
+    function renderTodos() {
+      todoList.innerHTML = '';
+      emptyMessage.classList.toggle('hidden', todos.length > 0);
+
+      getAllSortedTodos().forEach((todo) => {
+        todoList.appendChild(createTodoItem(todo));
+      });
+    }
+
+    function createTodoItem(todo) {
+        const priority = getPriority(todo.priority);
+        const item = document.createElement('li');
+        item.className = `todo-item priority-${priority}`;
+        item.classList.toggle('completed', todo.completed);
+        item.draggable = true;
+        item.dataset.id = String(todo.id);
+        item.addEventListener('dragstart', handleDragStart);
+        item.addEventListener('dragend', handleDragEnd);
+
+        const dragHandle = document.createElement('span');
+        dragHandle.className = 'drag-handle';
+        dragHandle.textContent = '⋮⋮';
+        dragHandle.setAttribute('aria-hidden', 'true');
+
+        const checkbox = document.createElement('input');
+        checkbox.className = 'todo-checkbox';
+        checkbox.type = 'checkbox';
+        checkbox.checked = todo.completed;
+        checkbox.setAttribute('aria-label', '완료 상태 변경');
+        checkbox.addEventListener('change', () => toggleTodo(todo.id));
+
+        const text = document.createElement('span');
+        text.className = 'todo-text';
+        text.textContent = todo.text;
+
+        const itemPriorityButtons = document.createElement('div');
+        itemPriorityButtons.className = 'item-priority-buttons';
+        itemPriorityButtons.setAttribute('role', 'group');
+        itemPriorityButtons.setAttribute('aria-label', '우선순위 변경');
+
+        Object.entries(priorityLabels).forEach(([value, label]) => {
+          const button = document.createElement('button');
+          button.className = 'priority-button';
+          button.classList.toggle('active', value === priority);
+          button.type = 'button';
+          button.dataset.priority = value;
+          button.textContent = label;
+          button.addEventListener('click', () => updatePriority(todo.id, value));
+          itemPriorityButtons.appendChild(button);
+        });
+
+        const deleteButton = document.createElement('button');
+        deleteButton.className = 'delete-button';
+        deleteButton.type = 'button';
+        deleteButton.textContent = '삭제';
+        deleteButton.addEventListener('click', () => deleteTodo(todo.id));
+
+        item.append(dragHandle, checkbox, text, itemPriorityButtons, deleteButton);
+        return item;
+    }
+
+    function handleDragStart(event) {
+      draggedTodoId = Number(event.currentTarget.dataset.id);
+      event.currentTarget.classList.add('dragging');
+      event.dataTransfer.effectAllowed = 'move';
+      event.dataTransfer.setData('text/plain', String(draggedTodoId));
+    }
+
+    function handleDragEnd(event) {
+      event.currentTarget.classList.remove('dragging');
+      draggedTodoId = null;
+      todoList.classList.remove('drag-over');
+    }
+
+    function handleDragOver(event) {
+      event.preventDefault();
+      event.dataTransfer.dropEffect = 'move';
+      todoList.classList.add('drag-over');
+    }
+
+    function handleDrop(event) {
+      event.preventDefault();
+
+      const targetItem = event.target.closest('.todo-item');
+      const draggedId = draggedTodoId || Number(event.dataTransfer.getData('text/plain'));
+
+      if (!draggedId) {
+        return;
+      }
+
+      if (targetItem && Number(targetItem.dataset.id) === draggedId) {
+        todoList.classList.remove('drag-over');
+        return;
+      }
+
+      moveTodo(draggedId, targetItem, event.clientY);
+      todoList.classList.remove('drag-over');
+    }
+
+    async function addTodo(text, priority) {
+      if (!supabaseClient) {
+        setStatus('Supabase 설정 후 할 일을 저장할 수 있습니다.');
+        return;
+      }
+
+      const todo = {
+        id: Date.now(),
+        text,
+        priority,
+        order: getNextOrder(priority),
+        completed: false
+      };
+
+      const { data, error } = await supabaseClient
+        .from(TODO_TABLE)
+        .insert(toDbTodo(todo))
+        .select('id, text, priority, order_index, completed')
+        .single();
+
+      if (error) {
+        setStatus(`할 일을 추가하지 못했습니다: ${error.message}`);
+        return;
+      }
+
+      todos.push(normalizeTodos([data])[0]);
+      setStatus('');
+      renderTodos();
+    }
+
+    async function updatePriority(id, priority) {
+      if (!supabaseClient) {
+        setStatus('Supabase 설정 후 우선순위를 저장할 수 있습니다.');
+        return;
+      }
+
+      const nextOrder = getNextOrder(priority);
+      const patch = {
+        priority,
+        order: nextOrder
+      };
+      const { error } = await supabaseClient
+        .from(TODO_TABLE)
+        .update(toDbPatch(patch))
+        .eq('id', id);
+
+      if (error) {
+        setStatus(`우선순위를 변경하지 못했습니다: ${error.message}`);
+        return;
+      }
+
+      todos = todos.map((todo) => {
+        if (todo.id !== id) {
+          return todo;
+        }
+
+        return {
+          ...todo,
+          ...patch
+        };
+      });
+
+      setStatus('');
+      renderTodos();
+    }
+
+    async function moveTodo(id, targetItem, pointerY) {
+      if (!supabaseClient) {
+        setStatus('Supabase 설정 후 순서를 저장할 수 있습니다.');
+        return;
+      }
+
+      const orderedIds = getAllSortedTodos()
+        .map((todo) => todo.id)
+        .filter((todoId) => todoId !== id);
+
+      let targetIndex = orderedIds.length;
+
+      if (targetItem) {
+        const targetId = Number(targetItem.dataset.id);
+        const itemRect = targetItem.getBoundingClientRect();
+        const isAfterTarget = pointerY > itemRect.top + itemRect.height / 2;
+        const foundIndex = orderedIds.indexOf(targetId);
+
+        if (foundIndex !== -1) {
+          targetIndex = foundIndex + (isAfterTarget ? 1 : 0);
+        }
+      }
+
+      orderedIds.splice(targetIndex, 0, id);
+
+      const updates = {};
+      let currentPriority = 'high';
+      const priorityCounts = {
+        high: 0,
+        normal: 0,
+        low: 0
+      };
+
+      orderedIds.forEach((todoId) => {
+        const originalTodo = todos.find((todo) => todo.id === todoId);
+        const originalPriority = getPriority(originalTodo.priority);
+
+        if (todoId === id) {
+          const previousTodo = todos.find((todo) => todo.id === orderedIds[targetIndex - 1]);
+          const nextTodo = todos.find((todo) => todo.id === orderedIds[targetIndex + 1]);
+          currentPriority = getDropPriority(previousTodo, nextTodo);
+        } else {
+          currentPriority = originalPriority;
+        }
+
+        updates[todoId] = {
+          priority: currentPriority,
+          order: priorityCounts[currentPriority]
+        };
+        priorityCounts[currentPriority] += 1;
+      });
+
+      const nextTodos = todos.map((todo) => ({
+        ...todo,
+        ...updates[todo.id]
+      }));
+
+      const { error } = await saveTodoOrders(nextTodos);
+
+      if (error) {
+        setStatus(`순서를 변경하지 못했습니다: ${error.message}`);
+        return;
+      }
+
+      todos = nextTodos;
+      setStatus('');
+      renderTodos();
+    }
+
+    async function saveTodoOrders(nextTodos) {
+      const changedTodos = nextTodos.filter((nextTodo) => {
+        const currentTodo = todos.find((todo) => todo.id === nextTodo.id);
+        return currentTodo
+          && (currentTodo.priority !== nextTodo.priority || currentTodo.order !== nextTodo.order);
+      });
+
+      const results = await Promise.all(changedTodos.map((todo) => (
+        supabaseClient
+          .from(TODO_TABLE)
+          .update(toDbPatch({
+            priority: todo.priority,
+            order: todo.order
+          }))
+          .eq('id', todo.id)
+      )));
+
+      return results.find((result) => result.error) || {};
+    }
+
+    function getAllSortedTodos() {
+      return [...todos].sort((a, b) => {
+        const priorityDiff = priorityOrder[getPriority(a.priority)] - priorityOrder[getPriority(b.priority)];
+
+        if (priorityDiff !== 0) {
+          return priorityDiff;
+        }
+
+        const orderDiff = a.order - b.order;
+
+        if (orderDiff !== 0) {
+          return orderDiff;
+        }
+
+        return a.id - b.id;
+      });
+    }
+
+    function getDropPriority(previousTodo, nextTodo) {
+      if (previousTodo && nextTodo) {
+        const previousPriority = getPriority(previousTodo.priority);
+        const nextPriority = getPriority(nextTodo.priority);
+
+        return previousPriority === nextPriority ? previousPriority : nextPriority;
+      }
+
+      if (previousTodo) {
+        return getPriority(previousTodo.priority);
+      }
+
+      if (nextTodo) {
+        return getPriority(nextTodo.priority);
+      }
+
+      return 'normal';
+    }
+
+    async function toggleTodo(id) {
+      if (!supabaseClient) {
+        setStatus('Supabase 설정 후 완료 상태를 저장할 수 있습니다.');
+        return;
+      }
+
+      const targetTodo = todos.find((todo) => todo.id === id);
+
+      if (!targetTodo) {
+        return;
+      }
+
+      const completed = !targetTodo.completed;
+      const { error } = await supabaseClient
+        .from(TODO_TABLE)
+        .update(toDbPatch({ completed }))
+        .eq('id', id);
+
+      if (error) {
+        setStatus(`완료 상태를 변경하지 못했습니다: ${error.message}`);
+        return;
+      }
+
+      todos = todos.map((todo) => {
+        if (todo.id !== id) {
+          return todo;
+        }
+
+        return {
+          ...todo,
+          completed
+        };
+      });
+
+      setStatus('');
+      renderTodos();
+    }
+
+    async function deleteTodo(id) {
+      if (!supabaseClient) {
+        setStatus('Supabase 설정 후 할 일을 삭제할 수 있습니다.');
+        return;
+      }
+
+      const { error } = await supabaseClient
+        .from(TODO_TABLE)
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        setStatus(`할 일을 삭제하지 못했습니다: ${error.message}`);
+        return;
+      }
+
+      todos = todos.filter((todo) => todo.id !== id);
+      setStatus('');
+      renderTodos();
+    }
+
+    todoForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+
+      const text = todoInput.value.trim();
+
+      if (!text) {
+        return;
+      }
+
+      await addTodo(text, selectedPriority);
+
+      if (supabaseClient) {
+        todoInput.value = '';
+        setSelectedPriority('normal');
+        todoInput.focus();
+      }
+    });
+
+    priorityButtons.addEventListener('click', (event) => {
+      const button = event.target.closest('.priority-button');
+
+      if (!button) {
+        return;
+      }
+
+      setSelectedPriority(button.dataset.priority);
+    });
+
+    todoList.addEventListener('dragover', handleDragOver);
+    todoList.addEventListener('drop', handleDrop);
+    todoList.addEventListener('dragleave', (event) => {
+      if (!todoList.contains(event.relatedTarget)) {
+        todoList.classList.remove('drag-over');
+      }
+    });
+
+    function setSelectedPriority(priority) {
+      selectedPriority = getPriority(priority);
+      priorityButtons.querySelectorAll('.priority-button').forEach((button) => {
+        button.classList.toggle('active', button.dataset.priority === selectedPriority);
+      });
+    }
+
+    async function init() {
+      todos = await loadTodos();
+      renderTodos();
+    }
+
+    init();
+  </script>
+</body>
+</html>
