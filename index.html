@@ -394,9 +394,7 @@
     async function loadTodos() {
       const { data, error } = await supabaseClient
         .from(TODO_TABLE)
-        .select('*')
-        .order('priority', { ascending: true }) // Basic order
-        .order('order_index', { ascending: true });
+        .select('*');
 
       if (error) {
         setStatus(`데이터 로드 실패: ${error.message}`);
@@ -428,18 +426,21 @@
       const item = document.createElement('li');
       item.className = `todo-item priority-${todo.priority}`;
       if (todo.completed) item.classList.add('completed');
-      
+
       item.innerHTML = `
         <span class="drag-handle">⋮⋮</span>
         <input type="checkbox" class="todo-checkbox" ${todo.completed ? 'checked' : ''}>
-        <span class="todo-text">${todo.text}</span>
+        <span class="todo-text"></span>
         <div class="item-priority-buttons"></div>
         <button class="delete-button">삭제</button>
       `;
 
+      // XSS 방지: textContent 사용
+      item.querySelector('.todo-text').textContent = todo.text;
+
       item.querySelector('.todo-checkbox').onclick = () => toggleTodo(todo.id, !todo.completed);
       item.querySelector('.delete-button').onclick = () => deleteTodo(todo.id);
-      
+
       const pButtons = item.querySelector('.item-priority-buttons');
       Object.entries(priorityLabels).forEach(([val, label]) => {
         const btn = document.createElement('button');
@@ -523,7 +524,5 @@
     };
 
   </script>
-</body>
-</html>
 </body>
 </html>
