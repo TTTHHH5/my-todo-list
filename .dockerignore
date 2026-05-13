@@ -1,0 +1,9 @@
+.git
+.pytest_cache
+__pycache__
+*.py[cod]
+*.db
+.env
+.venv
+venv
+node_modules

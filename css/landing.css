@@ -1,0 +1,569 @@
+/* Material Design 3 Dark Theme — Tetris Landing */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap');
+
+/* ── MD3 Color Tokens ───────────────────────── */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg:              #1C1B1F;
+  --surface:         #211F26;
+  --surface-low:     #1E1C22;
+  --surface-mid:     #2B2930;
+  --surface-high:    #36343B;
+  --primary:         #FFB4AB;
+  --on-primary:      #690005;
+  --primary-cont:    #93000A;
+  --on-primary-cont: #FFDAD6;
+  --on-surface:      #E6E1E5;
+  --on-surface-var:  #CAC4D0;
+  --muted:           #938F99;
+  --outline:         #79747E;
+  --outline-var:     #49454F;
+
+  /* Tetris block colors */
+  --t-cyan:   #00f5ff;
+  --t-yellow: #ffd700;
+  --t-purple: #bf5fff;
+  --t-green:  #39ff14;
+  --t-red:    #ff4040;
+  --t-orange: #ff8c00;
+  --t-blue:   #1e90ff;
+}
+
+/* ── Base ───────────────────────────────────── */
+html {
+  font-size: 110%;  /* 10% larger than browser default */
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--bg);
+  color: var(--on-surface);
+  font-family: 'Roboto', system-ui, sans-serif;
+  font-weight: 400;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── MD3 Ripple ─────────────────────────────── */
+.md-ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+.md-ripple .ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(0);
+  animation: ripple-anim 0.55s linear;
+  pointer-events: none;
+}
+
+@keyframes ripple-anim {
+  to { transform: scale(4); opacity: 0; }
+}
+
+/* ── Top App Bar ────────────────────────────── */
+.app-bar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 64px;
+  background: var(--surface-low);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px 0 24px;
+  z-index: 100;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+}
+
+.app-bar-title {
+  font-size: 1.375rem;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  color: var(--primary);
+}
+
+.app-bar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-ghost {
+  background: none;
+  border: none;
+  color: var(--on-surface-var);
+  font-family: 'Roboto', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 100px;
+  transition: color 0.15s, background 0.15s;
+}
+.btn-ghost:hover { color: var(--primary); background: rgba(255,180,171,0.08); }
+
+.btn-filled {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 24px;
+  background: var(--primary);
+  color: var(--on-primary);
+  text-decoration: none;
+  font-family: 'Roboto', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  border-radius: 100px;  /* MD3 full-pill button */
+  border: none;
+  cursor: pointer;
+  transition: box-shadow 0.2s, filter 0.2s;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.3), 0 2px 6px rgba(0,0,0,0.15);
+}
+
+.btn-filled:hover {
+  filter: brightness(0.92);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.35), 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.btn-filled:active {
+  filter: brightness(0.85);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+}
+
+/* ── Hero ───────────────────────────────────── */
+.hero {
+  min-height: 100vh;
+  padding-top: 64px; /* app-bar height */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding-left: 24px;
+  padding-right: 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(0deg,   transparent, transparent 29px, rgba(255,255,255,0.02) 30px),
+    repeating-linear-gradient(90deg,  transparent, transparent 29px, rgba(255,255,255,0.02) 30px);
+  pointer-events: none;
+}
+
+.hero-logo {
+  font-size: clamp(3.5rem, 12vw, 7.5rem);
+  font-weight: 900;
+  letter-spacing: 0.25em;
+  color: var(--primary);
+  text-shadow: 0 0 40px rgba(255, 180, 171, 0.45);
+  animation: flicker 5s infinite;
+  line-height: 1;
+  position: relative;
+}
+
+@keyframes flicker {
+  0%, 94%, 100% { opacity: 1; }
+  95%            { opacity: 0.82; }
+  96%            { opacity: 1; }
+  97%            { opacity: 0.65; }
+  98%            { opacity: 1; }
+}
+
+.hero-sub {
+  margin-top: 20px;
+  /* MD3 Body Large */
+  font-size: clamp(1rem, 2.5vw, 1.1rem);
+  font-weight: 400;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+  max-width: 480px;
+}
+
+.blocks-preview {
+  display: flex;
+  gap: 10px;
+  margin: 40px 0;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.block {
+  width: 38px;
+  height: 38px;
+  border-radius: 6px;
+  animation: bob 2.4s ease-in-out infinite;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+}
+
+.block:nth-child(1) { background: var(--t-cyan);   animation-delay: 0.0s; }
+.block:nth-child(2) { background: var(--t-yellow);  animation-delay: 0.2s; }
+.block:nth-child(3) { background: var(--t-purple);  animation-delay: 0.4s; }
+.block:nth-child(4) { background: var(--t-green);   animation-delay: 0.6s; }
+.block:nth-child(5) { background: var(--t-red);     animation-delay: 0.8s; }
+.block:nth-child(6) { background: var(--t-orange);  animation-delay: 1.0s; }
+.block:nth-child(7) { background: var(--t-blue);    animation-delay: 1.2s; }
+
+@keyframes bob {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-12px); }
+}
+
+.hero-btn {
+  font-size: 1rem;
+  padding: 14px 40px;
+}
+
+.scroll-hint {
+  position: absolute;
+  bottom: 32px;
+  font-size: 0.8rem;
+  color: var(--muted);
+  letter-spacing: 0.1em;
+  animation: nudge 1.8s ease-in-out infinite alternate;
+}
+
+@keyframes nudge {
+  from { opacity: 0.3; transform: translateY(5px); }
+  to   { opacity: 0.75; transform: translateY(0); }
+}
+
+/* ── Section wrapper ────────────────────────── */
+.section {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 80px 24px;
+}
+
+/* MD3 Display Small */
+.section-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--primary);
+  letter-spacing: 0.04em;
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+/* ── Feature Cards (MD3 Elevated Card) ──────── */
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.feature-card {
+  background: var(--surface-mid);
+  border-radius: 16px;  /* MD3 medium shape */
+  padding: 28px 20px;
+  text-align: center;
+  /* MD3 elevation level 2 */
+  box-shadow:
+    0 1px 2px rgba(0,0,0,0.3),
+    0 2px 6px rgba(0,0,0,0.15),
+    0 0 0 1px rgba(255,255,255,0.04) inset;
+  transition: box-shadow 0.2s, background 0.2s;
+}
+
+.feature-card:hover {
+  background: var(--surface-high);
+  box-shadow:
+    0 2px 4px rgba(0,0,0,0.35),
+    0 6px 16px rgba(0,0,0,0.2),
+    0 0 0 1px rgba(255,255,255,0.06) inset;
+}
+
+.feature-card .card-icon {
+  font-size: 2.6rem;
+  margin-bottom: 14px;
+  display: block;
+}
+
+.feature-card h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 10px;
+  letter-spacing: 0.01em;
+}
+
+.feature-card p {
+  font-size: 0.875rem;
+  color: var(--on-surface-var);
+  line-height: 1.7;
+}
+
+/* ── How to Play ─────────────────────────────  */
+.howto-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+/* MD3 Surface Container card */
+.md-card {
+  background: var(--surface-mid);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.3), 0 2px 6px rgba(0,0,0,0.15);
+}
+
+.md-card-title {
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 16px 20px 0;
+}
+
+/* Keys table */
+.keys-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.keys-table th,
+.keys-table td {
+  padding: 14px 20px;
+  text-align: left;
+  border-bottom: 1px solid var(--outline-var);
+  font-size: 0.9rem;
+}
+
+.keys-table th {
+  font-weight: 500;
+  font-size: 0.78rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.keys-table tr:last-child td { border-bottom: none; }
+
+kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  background: var(--surface-high);
+  color: var(--primary);
+  border: 1px solid var(--outline-var);
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-family: 'Roboto Mono', monospace;
+  font-size: 0.85em;
+  font-weight: 500;
+  box-shadow: 0 2px 0 var(--outline-var);
+}
+
+/* Scoring list */
+.scoring-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.scoring-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--outline-var);
+  font-size: 0.9rem;
+  color: var(--on-surface-var);
+  transition: background 0.15s;
+}
+
+.scoring-list li:last-child { border-bottom: none; }
+
+.scoring-list li:hover { background: rgba(255,255,255,0.04); }
+
+.scoring-list .pts {
+  font-weight: 700;
+  color: var(--primary);
+  font-size: 0.95rem;
+}
+
+/* ── Hall of Fame ────────────────────────────── */
+.hof-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  text-align: center;
+}
+
+.hof-card {
+  background: var(--surface-mid);
+  border-radius: 16px;
+  padding: 28px 16px 24px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.3), 0 2px 8px rgba(0,0,0,0.15);
+  transition: background 0.2s;
+}
+.hof-card:hover { background: var(--surface-high); }
+
+.hof-medal {
+  font-size: 2.4rem;
+  margin-bottom: 10px;
+  line-height: 1;
+}
+
+.hof-name {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--on-surface);
+  margin-bottom: 6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hof-score {
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: var(--primary);
+}
+.hof-score span { font-size: 0.8rem; font-weight: 400; color: var(--muted); margin-left: 2px; }
+
+.hof-empty, .hof-loading {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.9rem;
+  padding: 40px 0;
+}
+
+/* ── CTA ─────────────────────────────────────── */
+.cta {
+  text-align: center;
+  padding: 48px 24px 80px;
+}
+
+.cta p {
+  font-size: 1.1rem;
+  color: var(--muted);
+  margin-bottom: 28px;
+}
+
+/* ── Footer ──────────────────────────────────── */
+footer {
+  text-align: center;
+  padding: 24px;
+  font-size: 0.8rem;
+  color: var(--outline);
+  border-top: 1px solid var(--outline-var);
+}
+
+/* ── Responsive ──────────────────────────────── */
+
+/* Tablet: 600px – 959px */
+@media (max-width: 959px) {
+  .feature-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .howto-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .section {
+    padding: 60px 20px;
+  }
+
+  .hof-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Mobile: < 600px */
+@media (max-width: 599px) {
+  html { font-size: 105%; }
+
+  .app-bar {
+    padding: 0 12px 0 16px;
+  }
+
+  .app-bar-title {
+    font-size: 1.15rem;
+  }
+
+  .btn-filled {
+    padding: 8px 18px;
+    font-size: 0.8rem;
+  }
+
+  .hero-logo {
+    letter-spacing: 0.15em;
+  }
+
+  .hero-sub {
+    font-size: 0.92rem;
+  }
+
+  .blocks-preview { gap: 7px; }
+  .block { width: 30px; height: 30px; }
+
+  .feature-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .feature-card {
+    padding: 20px 16px;
+    display: flex;
+    text-align: left;
+    gap: 16px;
+    align-items: flex-start;
+  }
+
+  .feature-card .card-icon {
+    font-size: 2rem;
+    margin-bottom: 0;
+    flex-shrink: 0;
+  }
+
+  .section {
+    padding: 48px 16px;
+  }
+
+  .section-title {
+    font-size: 1.5rem;
+  }
+
+  .howto-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .keys-table th, .keys-table td {
+    padding: 12px 14px;
+    font-size: 0.85rem;
+  }
+
+  .hof-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .hof-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 20px;
+    text-align: left;
+  }
+
+  .hof-medal { font-size: 1.8rem; margin-bottom: 0; flex-shrink: 0; }
+  .hof-name  { font-size: 0.95rem; }
+  .hof-score { font-size: 1.2rem; margin-left: auto; }
+}
